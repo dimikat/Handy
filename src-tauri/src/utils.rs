@@ -5,6 +5,9 @@ use enigo::Key;
 use enigo::Keyboard;
 use enigo::Settings;
 use std::process::Command;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::Path;
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use rodio::OutputStreamBuilder;
@@ -308,4 +311,63 @@ pub fn focus_notepad_window() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+/// Append text to a file with timestamp
+pub fn append_to_file(text: &str, file_path: &str) -> Result<(), String> {
+    // Ensure the parent directory exists
+    if let Some(parent) = Path::new(file_path).parent() {
+        if !parent.exists() {
+            std::fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create directory: {}", e))?;
+        }
+    }
+
+    // Get current timestamp
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| format!("Failed to get timestamp: {}", e))?;
+    
+    // Format timestamp as readable string
+    let timestamp = chrono::DateTime::from_timestamp(now.as_secs() as i64, 0)
+        .ok_or("Invalid timestamp")?
+        .format("%Y-%m-%d %H:%M:%S");
+
+    // Format the entry with timestamp and text
+    let entry = format!("[{}] {}\n", timestamp, text);
+
+    // Append to file
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(file_path)
+        .map_err(|e| format!("Failed to open file '{}': {}", file_path, e))?;
+
+    file.write_all(entry.as_bytes())
+        .map_err(|e| format!("Failed to write to file: {}", e))?;
+
+    file.flush()
+        .map_err(|e| format!("Failed to flush file: {}", e))?;
+
+    Ok(())
+}
+
+/// Get the default log file path for the current platform
+pub fn get_default_log_path() -> Result<String, String> {
+    // Get the user's documents directory
+    let documents_dir = dirs::document_dir()
+        .ok_or("Could not find documents directory")?;
+    
+    // Create Handy subdirectory path
+    let handy_dir = documents_dir.join("Handy");
+    
+    // Ensure the directory exists
+    if !handy_dir.exists() {
+        std::fs::create_dir_all(&handy_dir)
+            .map_err(|e| format!("Failed to create Handy directory: {}", e))?;
+    }
+    
+    // Return the full path to the transcriptions log file
+    let log_file = handy_dir.join("transcriptions.txt");
+    Ok(log_file.to_string_lossy().to_string())
 }

@@ -6,3 +6,5 @@ export { PushToTalk } from "./PushToTalk";
 export { AudioFeedback } from "./AudioFeedback";
 export { HandyShortcut } from "./HandyShortcut";
 export { TranslateToEnglish } from "./TranslateToEnglish";
+export { TabbedSettings } from "./TabbedSettings";
+export { ShortcutProfiles } from "./ShortcutProfiles";

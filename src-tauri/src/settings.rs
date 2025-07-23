@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tauri::{App, AppHandle};
 use tauri_plugin_store::StoreExt;
+use crate::utils::get_default_log_path;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ShortcutBinding {
@@ -29,6 +30,12 @@ pub struct AppSettings {
     pub selected_output_device: Option<String>,
     #[serde(default = "default_translate_to_english")]
     pub translate_to_english: bool,
+    #[serde(default = "default_shortcuts_enabled")]
+    pub shortcuts_enabled: HashMap<String, bool>,
+    #[serde(default = "default_append_file_path")]
+    pub append_file_path: String,
+    #[serde(default = "default_show_notifications")]
+    pub show_notifications: bool,
 }
 
 fn default_model() -> String {
@@ -46,6 +53,24 @@ fn default_always_on_microphone() -> bool {
 fn default_translate_to_english() -> bool {
     // Default to false - users need to opt-in to translation
     false
+}
+
+fn default_shortcuts_enabled() -> HashMap<String, bool> {
+    let mut enabled = HashMap::new();
+    enabled.insert("transcribe".to_string(), true);
+    enabled.insert("notepad_transcribe".to_string(), true);
+    enabled.insert("clipboard_only".to_string(), true);
+    enabled.insert("append_to_file".to_string(), true);
+    enabled
+}
+
+fn default_append_file_path() -> String {
+    // Use the utility function to get the default path, fallback to a safe default
+    get_default_log_path().unwrap_or_else(|_| "transcriptions.txt".to_string())
+}
+
+fn default_show_notifications() -> bool {
+    true
 }
 
 pub const SETTINGS_STORE_PATH: &str = "settings_store.json";
@@ -95,6 +120,50 @@ pub fn get_default_settings() -> AppSettings {
             action_type: "notepad_transcribe".to_string(),
         },
     );
+
+    // Set platform-specific default keyboard shortcuts for clipboard-only mode
+    #[cfg(target_os = "windows")]
+    let clipboard_default_shortcut = "ctrl+alt+space";
+    #[cfg(target_os = "macos")]
+    let clipboard_default_shortcut = "alt+cmd+space";
+    #[cfg(target_os = "linux")]
+    let clipboard_default_shortcut = "ctrl+alt+space";
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    let clipboard_default_shortcut = "alt+cmd+space";
+
+    bindings.insert(
+        "clipboard_only".to_string(),
+        ShortcutBinding {
+            id: "clipboard_only".to_string(),
+            name: "Clipboard Only".to_string(),
+            description: "Transcribes speech and copies to clipboard without pasting.".to_string(),
+            default_binding: clipboard_default_shortcut.to_string(),
+            current_binding: clipboard_default_shortcut.to_string(),
+            action_type: "clipboard_only".to_string(),
+        },
+    );
+
+    // Set platform-specific default keyboard shortcuts for append-to-file mode
+    #[cfg(target_os = "windows")]
+    let append_default_shortcut = "ctrl+shift+alt+space";
+    #[cfg(target_os = "macos")]
+    let append_default_shortcut = "alt+shift+cmd+space";
+    #[cfg(target_os = "linux")]
+    let append_default_shortcut = "ctrl+shift+alt+space";
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    let append_default_shortcut = "alt+shift+cmd+space";
+
+    bindings.insert(
+        "append_to_file".to_string(),
+        ShortcutBinding {
+            id: "append_to_file".to_string(),
+            name: "Append to File".to_string(),
+            description: "Transcribes speech and appends to log file with timestamp.".to_string(),
+            default_binding: append_default_shortcut.to_string(),
+            current_binding: append_default_shortcut.to_string(),
+            action_type: "append_to_file".to_string(),
+        },
+    );
     // bindings.insert(
     //     "test".to_string(),
     //     ShortcutBinding {
@@ -115,6 +184,9 @@ pub fn get_default_settings() -> AppSettings {
         selected_microphone: None,
         selected_output_device: None,
         translate_to_english: false,
+        shortcuts_enabled: default_shortcuts_enabled(),
+        append_file_path: default_append_file_path(),
+        show_notifications: default_show_notifications(),
     }
 }
 

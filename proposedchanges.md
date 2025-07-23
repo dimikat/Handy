@@ -2,7 +2,7 @@
 
   1. Notepad Integration (your suggestion): Add a hotkey that automatically opens notepad.exe, focuses it, and then
    begins transcription directly into that window. This would require extending the action system in actions.rs to
-  support launching applications before transcription.
+  support launching applications before transcription. //checked off 
   2. Transcription History & Log: Maintain a searchable database of all transcriptions with timestamps, allowing
   users to review, edit, and reuse previous transcriptions. Could integrate with the existing Tauri store system.
   3. Multiple Output Destinations: Beyond just pasting into the active window, add options for:
@@ -21,7 +21,7 @@
 
   6. Multiple Hotkey Profiles: Different shortcuts for different transcription modes:
     - Quick paste (current behavior)
-    - Notepad mode
+    - Notepad mode //checked off
     - Clipboard-only mode
     - Append-to-file mode
   7. Wake Word Detection: Add always-listening wake word capability (like "Hey Handy") as an alternative to

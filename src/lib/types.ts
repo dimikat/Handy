@@ -29,6 +29,9 @@ export const SettingsSchema = z.object({
   selected_microphone: z.string().nullable().optional(),
   selected_output_device: z.string().nullable().optional(),
   translate_to_english: z.boolean(),
+  shortcuts_enabled: z.record(z.string(), z.boolean()),
+  append_file_path: z.string(),
+  show_notifications: z.boolean(),
 });
 
 export const BindingResponseSchema = z.object({
