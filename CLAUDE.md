@@ -109,6 +109,26 @@ Audio flows through: Microphone → VAD filtering → Whisper transcription → 
 - Models stored in app data directory (not bundle)
 - Platform-specific signing and distribution settings in `tauri.conf.json`
 
+## Testing & Platform Considerations
+
+### Testing Limitations
+- **Primary Target**: Windows .exe application with specific system integrations
+- **Claude Code Testing**: May be difficult to run full application tests due to:
+  - Platform-specific audio device access requirements
+  - Global keyboard hook dependencies (`rdev` library)
+  - Whisper model file requirements for transcription testing
+  - Microphone and accessibility permission requirements
+
+### Platform-Specific Development Notes
+- **Windows**: Primary development target, includes Vulkan acceleration and native clipboard/paste integration
+- **macOS**: Requires Xcode Command Line Tools, uses Metal acceleration, has strict accessibility permissions
+- **Linux**: Requires ALSA development libraries, uses OpenBLAS + Vulkan
+
+### Testing Strategy
+- **Unit Tests**: Focus on isolated components (audio processing, settings management)
+- **Integration Tests**: Mock Tauri commands and manager interfaces where possible
+- **Manual Testing**: Application functionality requires running the built executable with proper system permissions
+
 ## Common Tasks
 
 ### Adding New Settings

@@ -4,6 +4,7 @@ use enigo::Enigo;
 use enigo::Key;
 use enigo::Keyboard;
 use enigo::Settings;
+use std::process::Command;
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use rodio::OutputStreamBuilder;
@@ -188,6 +189,123 @@ fn play_audio_file(
 
     let sink = rodio::play(mixer, buf_reader)?;
     sink.sleep_until_end();
+
+    Ok(())
+}
+
+/// Launch notepad.exe on Windows
+/// Returns the process ID if successful
+#[cfg(target_os = "windows")]
+pub fn launch_notepad() -> Result<u32, String> {
+    match Command::new("notepad.exe").spawn() {
+        Ok(child) => {
+            // Small delay to allow the process to fully start
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            Ok(child.id())
+        }
+        Err(e) => Err(format!("Failed to launch notepad: {}", e)),
+    }
+}
+
+/// Launch notepad.exe on non-Windows platforms (fallback to default text editor)
+#[cfg(not(target_os = "windows"))]
+pub fn launch_notepad() -> Result<u32, String> {
+    // On macOS, try TextEdit
+    #[cfg(target_os = "macos")]
+    let editor_cmd = "open";
+    #[cfg(target_os = "macos")]  
+    let editor_args = vec!["-a", "TextEdit"];
+    
+    // On Linux, try gedit or nano
+    #[cfg(target_os = "linux")]
+    let editor_cmd = "gedit";
+    #[cfg(target_os = "linux")]
+    let editor_args: Vec<&str> = vec![];
+    
+    // Fallback for other platforms
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    let editor_cmd = "notepad";
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    let editor_args: Vec<&str> = vec![];
+
+    let mut command = Command::new(editor_cmd);
+    for arg in editor_args {
+        command.arg(arg);
+    }
+    
+    match command.spawn() {
+        Ok(child) => {
+            // Small delay to allow the process to fully start
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            Ok(child.id())
+        }
+        Err(e) => Err(format!("Failed to launch text editor: {}", e)),
+    }
+}
+
+/// Focus a window by attempting to bring it to the front
+/// This is a simplified implementation that works by simulating Alt+Tab behavior
+pub fn focus_notepad_window() -> Result<(), String> {
+    let mut enigo = Enigo::new(&Settings::default())
+        .map_err(|e| format!("Failed to initialize Enigo for window focusing: {}", e))?;
+
+    // Small delay to ensure the window has had time to appear
+    std::thread::sleep(std::time::Duration::from_millis(200));
+
+    // On Windows, we can try to use Alt+Tab to cycle to notepad
+    // This is a simplified approach - a more robust solution would use Windows API
+    #[cfg(target_os = "windows")]
+    {
+        // Try to focus the most recently opened window (which should be notepad)
+        // Note: This is a simplified approach. A more robust solution would 
+        // enumerate windows and find notepad specifically.
+        enigo
+            .key(Key::Alt, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Alt key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Tab key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Tab key: {}", e))?;
+        enigo
+            .key(Key::Alt, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Alt key: {}", e))?;
+    }
+
+    // For macOS, use Cmd+Tab
+    #[cfg(target_os = "macos")]
+    {
+        enigo
+            .key(Key::Meta, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Cmd key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Tab key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Tab key: {}", e))?;
+        enigo
+            .key(Key::Meta, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Cmd key: {}", e))?;
+    }
+
+    // For Linux, use Alt+Tab
+    #[cfg(target_os = "linux")]
+    {
+        enigo
+            .key(Key::Alt, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Alt key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Press)
+            .map_err(|e| format!("Failed to press Tab key: {}", e))?;
+        enigo
+            .key(Key::Tab, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Tab key: {}", e))?;
+        enigo
+            .key(Key::Alt, enigo::Direction::Release)
+            .map_err(|e| format!("Failed to release Alt key: {}", e))?;
+    }
 
     Ok(())
 }

@@ -6,6 +6,7 @@ export const ShortcutBindingSchema = z.object({
   description: z.string(),
   default_binding: z.string(),
   current_binding: z.string(),
+  action_type: z.string(),
 });
 
 export const ShortcutBindingsMapSchema = z.record(

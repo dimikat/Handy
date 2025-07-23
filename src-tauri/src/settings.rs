@@ -10,6 +10,7 @@ pub struct ShortcutBinding {
     pub description: String,
     pub default_binding: String,
     pub current_binding: String,
+    pub action_type: String,
 }
 
 /* still handy for composing the initial JSON in the store ------------- */
@@ -69,6 +70,29 @@ pub fn get_default_settings() -> AppSettings {
             description: "Converts your speech into text.".to_string(),
             default_binding: default_shortcut.to_string(),
             current_binding: default_shortcut.to_string(),
+            action_type: "transcribe".to_string(),
+        },
+    );
+
+    // Set platform-specific default keyboard shortcuts for notepad mode
+    #[cfg(target_os = "windows")]
+    let notepad_default_shortcut = "ctrl+shift+space";
+    #[cfg(target_os = "macos")]
+    let notepad_default_shortcut = "alt+shift+space";
+    #[cfg(target_os = "linux")]
+    let notepad_default_shortcut = "ctrl+shift+space";
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    let notepad_default_shortcut = "alt+shift+space";
+
+    bindings.insert(
+        "notepad_transcribe".to_string(),
+        ShortcutBinding {
+            id: "notepad_transcribe".to_string(),
+            name: "Notepad Transcribe".to_string(),
+            description: "Opens notepad and transcribes speech into it.".to_string(),
+            default_binding: notepad_default_shortcut.to_string(),
+            current_binding: notepad_default_shortcut.to_string(),
+            action_type: "notepad_transcribe".to_string(),
         },
     );
     // bindings.insert(
