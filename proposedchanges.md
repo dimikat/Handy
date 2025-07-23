@@ -19,7 +19,7 @@
 
   Audio & Input Improvements
 
-  6. Multiple Hotkey Profiles: Different shortcuts for different transcription modes:
+  6. Multiple Hotkey Profiles: Different shortcuts for different transcription modes: //checked off
     - Quick paste (current behavior)
     - Notepad mode //checked off
     - Clipboard-only mode
@@ -27,7 +27,7 @@
   7. Wake Word Detection: Add always-listening wake word capability (like "Hey Handy") as an alternative to
   hotkeys, using the existing VAD system.
   8. Audio Playback & Review: Let users hear their recorded audio before transcription is applied, with options to
-  re-record or proceed.
+  re-record or proceed.l
   9. Noise Cancellation & Audio Enhancement: Integrate additional audio processing to improve transcription quality
    in noisy environments.
 
@@ -58,3 +58,7 @@
     - Export transcription history to various formats
     - Cloud sync across devices
     - Integration with note-taking services (Notion, Obsidian)
+
+    --- [ ] 
+
+    Settings menu //checked off

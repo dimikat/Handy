@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.3.1] - 2025-07-23
+
+### Added
+- **Multiple Hotkey Profiles**: Four distinct transcription modes with dedicated shortcuts:
+  - Quick Transcribe (Ctrl+Space): Original paste-to-active-window behavior
+  - Notepad Mode (Ctrl+Shift+Space): Automatically opens notepad and transcribes into it
+  - Clipboard Only (Ctrl+Alt+Space): Transcribes and copies to clipboard without pasting
+  - Append to File (Ctrl+Shift+Alt+Space): Transcribes and appends to timestamped log file
+- **Modern Tabbed Settings Interface**: Professional UI with organized tabs for Shortcuts, Audio, Models, and Advanced settings
+- **Enhanced Tooltips**: Rich, informative tooltips explaining each feature with detailed descriptions
+- **Individual Shortcut Toggles**: Enable/disable specific transcription modes independently
+- **File Logging System**: Timestamped transcription logging to user-configurable file locations
+- **Cross-platform Text Editor Support**: Notepad on Windows, TextEdit on macOS, gedit on Linux
+
+### Changed
+- Complete settings UI redesign with tabbed navigation and modern styling
+- Enhanced shortcut management with visual enable/disable controls
+- Improved user experience with detailed feature explanations
+- Better organization of settings across logical categories
+
+### Technical
+- Extended settings schema with new configuration options
+- Added chrono and dirs dependencies for file operations
+- Implemented new action system supporting multiple transcription modes
+- Enhanced audio pipeline to support different output destinations
+
 ## [0.3.0] - 2025-07-11
 
 ### Added
